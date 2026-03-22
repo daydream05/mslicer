@@ -1,15 +1,16 @@
 use std::{
     fs::{self, File},
-    io::{BufReader, Read, Seek, Write, stdout},
+    io::{stdout, BufReader, Read, Seek, Write},
     thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
 
 use anyhow::{Context, Ok, Result};
-use args::{Args, Model};
+use args::{Args, Model, SupportMode};
 use clap::{CommandFactory, FromArgMatches};
 use clone_macro::clone;
 use image::{ImageReader, RgbaImage};
+use nalgebra::Vector2;
 
 use common::{
     progress::Progress,
@@ -20,6 +21,7 @@ use common::{
 use slicer::{
     mesh::Mesh,
     slicer::{Slicer, SlicerModel},
+    supports::{generate_auto_supports, merge_meshes, SupportConfig},
 };
 
 mod args;
@@ -53,6 +55,19 @@ fn main() -> Result<()> {
 
         // Scale the model into printer-space (mm => px)
         mesh.set_scale(model.scale.component_mul(&mm_to_px));
+
+        if args.supports == SupportMode::Auto {
+            let support_config = scaled_support_config(args.mm_to_px().xy());
+            let supports = generate_auto_supports(
+                &mesh,
+                slice_config.slice_height.get::<Milimeter>(),
+                &support_config,
+            );
+
+            if supports.mesh.face_count() > 0 {
+                mesh = merge_meshes(&[&mesh, &supports.mesh]);
+            }
+        }
 
         println!(
             "Loaded `{}`. {{ vert: {}, face: {} }}",
@@ -140,4 +155,14 @@ fn monitor_progress<T>(
     }
 
     Ok(handle.join().unwrap())
+}
+
+fn scaled_support_config(mm_to_px: Vector2<f32>) -> SupportConfig {
+    let xy_scale = (mm_to_px.x + mm_to_px.y) * 0.5;
+    let mut config = SupportConfig::default();
+    config.pillars.diameter *= xy_scale;
+    config.pillars.tip_diameter *= xy_scale;
+    config.pillars.spacing *= xy_scale;
+    config.raft.offset *= xy_scale;
+    config
 }

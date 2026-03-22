@@ -5,7 +5,7 @@ use tracing::info;
 
 use crate::{
     builder::MeshBuilder,
-    geometry::{Ray, primitive, triangle::triangle_intersection},
+    geometry::{primitive, triangle::triangle_intersection, Ray},
     half_edge::HalfEdgeMesh,
     mesh::Mesh,
     supports::overhangs::detect_point_overhangs,

@@ -1,12 +1,12 @@
 use std::{any::Any, path::PathBuf, str::FromStr};
 
 use anyhow::{Context, Ok, Result};
-use clap::{ArgMatches, Parser};
+use clap::{ArgMatches, Parser, ValueEnum};
 use common::{
     slice::{ExposureConfig, Format, SliceConfig},
     units::{Milimeters, MilimetersPerMinute, Seconds},
 };
-use nalgebra::{ArrayStorage, Const, Matrix, Scalar, U1, Vector2, Vector3};
+use nalgebra::{ArrayStorage, Const, Matrix, Scalar, Vector2, Vector3, U1};
 
 /// mslicer command line interface.
 #[derive(Debug, Parser)]
@@ -69,6 +69,10 @@ pub struct Args {
     /// Path to a preview image, will be scaled as needed.
     pub preview: Option<PathBuf>,
 
+    #[arg(long, value_enum, default_value_t = SupportMode::None)]
+    /// Automatic support generation mode.
+    pub supports: SupportMode,
+
     #[command(flatten)]
     pub model: ModelArgs,
 
@@ -104,6 +108,13 @@ pub struct Model {
     pub position: Vector3<f32>,
     pub rotation: Vector3<f32>,
     pub scale: Vector3<f32>,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, ValueEnum)]
+pub enum SupportMode {
+    Auto,
+    #[default]
+    None,
 }
 
 impl Args {
@@ -217,4 +228,25 @@ where
     }
 
     Ok(vec)
+}
+
+#[cfg(test)]
+mod tests {
+    use clap::Parser;
+
+    use super::{Args, SupportMode};
+
+    #[test]
+    fn parses_auto_support_mode() {
+        let args = Args::parse_from([
+            "slicer",
+            "--mesh",
+            "model.stl",
+            "--supports",
+            "auto",
+            "output.ctb",
+        ]);
+
+        assert_eq!(args.supports, SupportMode::Auto);
+    }
 }
