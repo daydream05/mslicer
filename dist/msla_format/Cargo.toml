@@ -14,6 +14,7 @@ repository = "https://github.com/connorslade/mslicer"
 
 [dependencies]
 anyhow.workspace = true
+common.workspace = true
 crc32fast.workspace = true
 image.workspace = true
 nalgebra.workspace = true

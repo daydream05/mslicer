@@ -3075,6 +3075,7 @@ dependencies = [
  "anyhow",
  "cbc",
  "chrono",
+ "common",
  "crc32fast",
  "image",
  "nalgebra 0.34.1",
@@ -4460,6 +4461,19 @@ name = "renderdoc-sys"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
+
+[[package]]
+name = "reslicer"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "common",
+ "image",
+ "mesh_format",
+ "nalgebra 0.34.1",
+ "slicer",
+]
 
 [[package]]
 name = "rfd"

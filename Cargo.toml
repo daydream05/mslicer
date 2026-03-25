@@ -9,6 +9,7 @@ members = [
     "format/mesh_format",
     "format/nanodlp_format",
     "mslicer",
+    "reslicer",
     "remote_send",
     "slicer"
 ]

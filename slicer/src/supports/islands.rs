@@ -105,7 +105,7 @@ fn join_segments(segments_raw: &[Vector2<f32>]) -> Vec<Vec<Vector2<f32>>> {
 
     let mut polygons = Vec::new();
     while let Some(&start) = segments.iter().next() {
-        let mut polygon = vec![dequantize(start.0)];
+        let mut polygon = Vec::new();
         let mut last = start.1;
 
         loop {
@@ -132,7 +132,7 @@ fn join_segments(segments_raw: &[Vector2<f32>]) -> Vec<Vec<Vector2<f32>>> {
                 edge.0
             };
 
-            if next == start.0 || (distances[0] > DISTANCE_CUTOFF && distances[1] > DISTANCE_CUTOFF)
+            if next == start.1 || (distances[0] > DISTANCE_CUTOFF && distances[1] > DISTANCE_CUTOFF)
             {
                 segments.remove(&edge);
                 break;
@@ -267,7 +267,8 @@ fn edges_intersect(a0: Vector2<f32>, a1: Vector2<f32>, b0: Vector2<f32>, b1: Vec
 mod tests {
     use nalgebra::Vector3;
 
-    use super::detect_island_layers;
+    use super::{detect_island_layers, slice_regions};
+    use crate::geometry::Segments1D;
     use crate::{builder::MeshBuilder, mesh::Mesh};
 
     #[test]
@@ -280,7 +281,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "island detection needs slice_regions fix for sphere geometry"]
     fn floating_sphere_marks_every_layer_as_unsupported() {
         // Use larger sphere with more subdivisions for reliable slicing
         let mesh = floating_sphere_mesh(5.0, Vector3::new(0.0, 0.0, 10.0));
@@ -292,6 +292,19 @@ mod tests {
             islands.len() >= 4,
             "expected >= 4 island layers, got {}",
             islands.len()
+        );
+    }
+
+    #[test]
+    fn floating_sphere_slice_regions_finds_mid_layer_cross_section() {
+        let mesh = floating_sphere_mesh(5.0, Vector3::new(0.0, 0.0, 10.0));
+        let segments = Segments1D::from_mesh(&mesh, 15);
+
+        let regions = slice_regions(&mesh, &segments, 10.0);
+
+        assert!(
+            !regions.is_empty(),
+            "expected mid-layer sphere slice to produce a region"
         );
     }
 

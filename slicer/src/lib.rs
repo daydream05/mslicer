@@ -4,6 +4,7 @@ pub mod builder;
 pub mod geometry;
 pub mod half_edge;
 pub mod mesh;
+pub mod pipeline;
 pub mod post_process;
 pub mod slicer;
 pub mod supports;

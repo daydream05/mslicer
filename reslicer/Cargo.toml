@@ -1,0 +1,13 @@
+[package]
+name = "reslicer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+common.workspace = true
+image.workspace = true
+mesh_format.workspace = true
+nalgebra.workspace = true
+slicer.workspace = true
